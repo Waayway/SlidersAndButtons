@@ -1,0 +1,19 @@
+@use "config.scss";
+@use "sass:math";
+@function is-color-dark($color) {
+  // Parse RGB by isolating each color
+  $red: red($color);
+  $green: green($color);
+  $blue: blue($color);
+  // Compute the perceptive luminance, keeping
+  // in mind that the human eye favors green.
+  $l: 1 - math.div((0.299 * $red + 0.587 * $green + 0.114 * $blue), 255);
+  /* arguably this should be 0.50, but testing out various colors, this seemed to be the best so far. */
+  @if ($l < 0.41) {
+    // if the luminance is less than 0.5 return black
+    @return #000000;
+  } @else {
+    // if the luminance is more than 0.5 return white
+    @return #ffffff;
+  }
+}

@@ -1,0 +1,25 @@
+@use "sass:map";
+
+$colors: (
+    // # Default colors
+    "primary": #27557A,
+    "secondary": #09814A,
+    "error": #D62839,
+    // * Background colors
+    "background": #393E41,
+    "background-lighter": #555B5F,
+    "background-darker": #26282A,
+    // * Keys and sliders
+    "key-outer-bg": #555B5F,
+    "key-inner-bg": #26282A,
+);
+
+@function get-color($color: false) {
+    @if $color {
+        @return map.get($colors, $color);
+    }
+
+    @else {
+        @return $colors;
+    }
+}

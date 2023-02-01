@@ -1,18 +1,30 @@
 <script lang="ts">
+  import "./styles/globals.scss";
+  import MainArea from "./lib/MainArea.svelte";
   import Nav from "./lib/Nav.svelte";
-    import SerialChooser from "./lib/SerialChooser.svelte";
+  import SerialChooser from "./lib/SerialChooser.svelte";
 </script>
 
-<main class="bg-bg w-full h-screen">
+<main>
   <header>
-    <Nav></Nav>
+    <Nav />
   </header>
-  <div class="grid grid-cols-4">
-    <div class="col-span-2">
-      <SerialChooser />
-    </div>    
-    <div class="col-span-1">
-      
-    </div>
+  <div class="main">
+    <SerialChooser />
+    <MainArea />
   </div>
 </main>
+
+<style lang="scss">
+  main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    .main {
+      display: flex;
+      flex-direction: column;
+
+      height: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,16 @@
+@use "config/config.scss";
+@use "config/util.scss";
+@import 'font/Roboto.scss';
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: "Roboto", sans-serif;
+    background-color: config.get-color('background');
+    color: util.is-color-dark(config.get-color('background'));
+}
