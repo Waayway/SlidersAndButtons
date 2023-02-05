@@ -25,3 +25,13 @@ export type Component = {
         key?: boolean,
     }
 }
+
+export type KeyCombo = {
+    key?: string,
+    modifiers: {
+        alt?: boolean,
+        ctrl?: boolean,
+        shift?: boolean,
+        super?: boolean
+    }
+}

@@ -6,13 +6,11 @@
 
   import offset from "mouse-event-offset";
   import type { GridItem } from "./types";
-  import type { PanZoom } from "panzoom";
 
   export let data: GridItem;
   export let gridSize: number;
   export let gridContainer: HTMLDivElement;
   export let callback: (gridItem: GridItem) => void;
-  export let panzoomInstance: PanZoom;
 
   let pos = {
     x: -100,

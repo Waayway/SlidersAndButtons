@@ -9,11 +9,13 @@
     createNewItem(type);
   }
 
+  export let saveItemsCallback: () => void;
+
 </script>
 
 <Splitpanes theme="">
   <Pane minSize={40} class="grid">
-    <Grid bind:createNewItem={createNewItem} />
+    <Grid bind:createNewItem={createNewItem} bind:saveItems={saveItemsCallback} />
   </Pane>
   <Pane class="components">
     <ComponentChooser addToGridCallback={addToGridCallback}/>

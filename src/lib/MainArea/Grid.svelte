@@ -4,8 +4,9 @@
   import { onMount } from "svelte";
   import panzoom, { type PanZoom } from "panzoom";
   import TempGridItem from "./TempGridItem.svelte";
+  import { invoke } from "@tauri-apps/api/tauri";
 
-  let items: Array<GridItemType> = [];
+  let items: GridItemType[] = [];
   let tempItem: GridItemType;
 
   let itemTemplates: GridItemTemplate = {
@@ -44,7 +45,7 @@
   let gridContainer: HTMLDivElement;
   let panzoomInstance: PanZoom;
 
-  onMount(() => {
+  onMount(async () => {
     panzoomInstance = panzoom(gridContainer, {
       minZoom: 0.5,
       maxZoom: 2,
@@ -55,26 +56,45 @@
       },
     });
     panzoomInstance.moveTo(-5000, -2500);
+    items = await invoke("get_grid_config");
   });
+
   const tempItemToItem = (gridItem: GridItemType) => {
-    tempItem = undefined;
+    tempItem = null;
     items.push(gridItem);
     items = items;
-  }
+  };
 
   export const createNewItem = (type: string) => {
-    tempItem = itemTemplates[type];
+    tempItem = structuredClone(itemTemplates[type]);
   };
-  
+
+  export const saveItems = () => {
+    invoke("save_grid_config", { gridItems: items });
+  };
+
+  const deleteItemFromItems = (gridData: GridItemType) => {
+    items = items.filter((obj) => obj !== gridData);
+  };
 </script>
 
 <div class="overflow-container" bind:this={overflowContainer}>
   <div class="grid-container" bind:this={gridContainer}>
-    {#each items as item, i (i)}
-      <GridItem gridData={item} {gridSize} />
+    {#each items as item, i (item)}
+      <GridItem
+        gridData={item}
+        {gridSize}
+        deleteSelfFromItems={deleteItemFromItems}
+        itemIndex={i}
+      />
     {/each}
     {#if tempItem}
-      <TempGridItem data={tempItem} {gridSize} {gridContainer} callback={tempItemToItem} {panzoomInstance}/>
+      <TempGridItem
+        data={tempItem}
+        {gridSize}
+        {gridContainer}
+        callback={tempItemToItem}
+      />
     {/if}
   </div>
 </div>

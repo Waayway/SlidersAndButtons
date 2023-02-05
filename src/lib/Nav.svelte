@@ -2,7 +2,9 @@
     import { invoke } from "@tauri-apps/api/tauri";
     import Logo from "./Logo.svelte";
     
+    export let globalSaveCallback: () => void;
     let callback = async () => {
+        globalSaveCallback();
         await invoke("save_config");
     }
 </script>

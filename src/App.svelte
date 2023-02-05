@@ -3,15 +3,19 @@
   import MainArea from "./lib/MainArea.svelte";
   import Nav from "./lib/Nav.svelte";
   import SerialChooser from "./lib/SerialChooser.svelte";
+  let saveItemsCallback: () => void;
+  let globalSaveCallback = () => {
+    saveItemsCallback();
+  };
 </script>
 
 <main>
   <header>
-    <Nav />
+    <Nav bind:globalSaveCallback />
   </header>
   <div class="main">
     <SerialChooser />
-    <MainArea />
+    <MainArea bind:saveItemsCallback />
   </div>
 </main>
 

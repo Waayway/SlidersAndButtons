@@ -12,6 +12,12 @@ $colors: (
     // * Keys and sliders
     "key-outer-bg": #555B5F,
     "key-inner-bg": #26282A,
+    // * Sidebar component chooser
+    "sidebar-btn-bg": #26282A,
+    // * Item Popups 
+    "popup-bg": #26282A,
+    "popup-del-yes": rgb(93, 233, 93),
+    "popup-del-no": #D62839
 );
 
 @function get-color($color: false) {
