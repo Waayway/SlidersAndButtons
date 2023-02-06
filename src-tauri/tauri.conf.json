@@ -65,6 +65,10 @@
         "title": "buttons_and_sliders",
         "width": 800
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/128x128.png",
+      "iconAsTemplate": true
+    }
   }
 }

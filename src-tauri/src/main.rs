@@ -5,13 +5,69 @@
 
 use commands::DataState;
 use serialization::Data;
+use tauri::{AppHandle, Manager, SystemTray, SystemTrayEvent};
+use tauri::{CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem};
 
 mod commands;
 mod serialization;
 
+fn build_tray() -> SystemTrayMenu {
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    let hide = CustomMenuItem::new("hide".to_string(), "Hide");
+    SystemTrayMenu::new()
+        .add_item(quit)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(hide)
+}
+
+fn on_tray_event(app: &AppHandle, event: SystemTrayEvent) {
+    match event {
+        SystemTrayEvent::LeftClick {
+            position: _,
+            size: _,
+            ..
+        } => {}
+        SystemTrayEvent::RightClick {
+            position: _,
+            size: _,
+            ..
+        } => {}
+        SystemTrayEvent::DoubleClick {
+            position: _,
+            size: _,
+            ..
+        } => {}
+
+        SystemTrayEvent::MenuItemClick { id, .. } => {
+            let item_handle = app.tray_handle().get_item(&id);
+            match id.as_str() {
+                "quit" => {
+                    std::process::exit(0);
+                }
+                "hide" => {
+                    let window = app.get_window("main").unwrap();
+                    if window.is_visible().unwrap() {
+                        window.hide().unwrap();
+                    } else {
+                        window.show().unwrap();
+                    }
+                    item_handle.set_title("Show").unwrap();
+                }
+                _ => {}
+            }
+        }
+        _ => {}
+    }
+}
+
 fn main() {
     Data::create_if_file_not_exist().unwrap();
+
+    let tray = SystemTray::new().with_menu(build_tray());
+
     tauri::Builder::default()
+        .system_tray(tray)
+        .on_system_tray_event(on_tray_event)
         .manage(DataState(Data::load_data().into()))
         .invoke_handler(tauri::generate_handler![
             commands::get_serial_ports,
