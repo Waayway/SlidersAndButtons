@@ -1,8 +1,7 @@
-use std::{string, sync::Mutex};
+use std::{sync::Mutex};
 
-use serde::Deserialize;
 
-use crate::serialization::{Data, GridItem};
+use crate::{serialization::{Data, GridItem}, background::BackgroundState};
 
 pub struct DataState(pub Mutex<Data>);
 
@@ -26,7 +25,21 @@ pub fn get_grid_config(state: tauri::State<DataState>) -> Vec<GridItem> {
     return state.0.lock().unwrap().grid_items.clone();
 }
 
-
+#[tauri::command]
+pub fn get_possible_keys() -> Vec<String> {
+    let mut keys: Vec<String> = vec![
+        "Escape".to_string(),
+        "MediaNextTrack".to_string(),
+        "MediaPreviousTrack".to_string(),
+        "MediaStop".to_string(),
+        "MediaPlayPause".to_string()
+    ];
+    for i in 1..25 {
+        keys.append(&mut vec![format!("F{}", i)]);
+    }
+    let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return keys;
+}
 
 #[tauri::command]
 pub fn save_grid_config(grid_items: Vec<GridItem>, state: tauri::State<DataState>) {
@@ -41,6 +54,11 @@ pub fn save_grid_config(grid_items: Vec<GridItem>, state: tauri::State<DataState
 }
 
 #[tauri::command]
-pub fn save_config(state: tauri::State<DataState>) {
-    state.0.lock().unwrap().save_data().unwrap();
+pub fn save_config(state: tauri::State<DataState>, background_state: tauri::State<BackgroundState>) {
+    state.0.lock().unwrap().save_data(background_state).unwrap();
+}
+
+#[tauri::command]
+pub fn get_serial_config(state: tauri::State<DataState>) -> String {
+    state.0.lock().unwrap().serial_port.clone()
 }

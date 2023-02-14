@@ -54,6 +54,10 @@
       onDoubleClick: (e) => {
         return false;
       },
+      beforeWheel: (e) => {
+        let shouldIgnore = Boolean((e.target as HTMLElement).closest(".stop-scroll"));
+        return shouldIgnore;
+      }
     });
     panzoomInstance.moveTo(-5000, -2500);
     items = await invoke("get_grid_config");
@@ -70,6 +74,7 @@
   };
 
   export const saveItems = () => {
+    console.log(items[0].data);
     invoke("save_grid_config", { gridItems: items });
   };
 

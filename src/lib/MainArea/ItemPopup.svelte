@@ -1,13 +1,22 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { onMount } from "svelte";
   import MdDelete from "svelte-icons/md/MdDelete.svelte";
+  import KeyChooser from "./KeyChooser.svelte";
   import type { GridItem, KeyCombo } from "./types";
 
   export let gridData: GridItem;
   export let active: boolean;
   export let updateKey: (key: string) => void;
+  export let updateKeyCombo: (keyCombo: KeyCombo) => void;
   export let deleteSelf: () => void;
 
-  let keyCombo: KeyCombo = { modifiers: {} };
+  let keyCombo: KeyCombo = gridData.data.keyCombo ?? { modifiers: {
+    alt: false,
+    ctrl: false,
+    shift: false,
+    super: false
+  } };
 
   let deleting = false;
 
@@ -16,18 +25,30 @@
       updateKey((ev.currentTarget as HTMLInputElement).value);
     }
   };
-
   const sureDelete = () => {
     deleting = true;
   };
 
-  let ctrlClicked = false;
+  let keyOpen = false;
+  const toggleKeys = () => { 
+    keyOpen = !keyOpen;
+  };
+  const keyChooserCallback = (key: string) => {
+    toggleKeys();
+    keyCombo.key = key;
+    updateKeyCombo(keyCombo);
+  }
 </script>
 
 <div class={`popup ${active ? "active" : ""}`}>
   {#if gridData.type == "button"}
     <div class="key">
-      <input type="text" placeholder="Key on keypad" on:keypress={onKeyPress} value={gridData.data.key} />
+      <input
+        type="text"
+        placeholder="Key on keypad"
+        on:keypress={onKeyPress}
+        value={gridData.data.key}
+      />
     </div>
     <div class="keypress">
       <p>Control:</p>
@@ -41,6 +62,11 @@
 
       <p>Win/Super:</p>
       <input type="checkbox" bind:checked={keyCombo.modifiers.super} />
+
+      <button on:click={toggleKeys}>{keyCombo.key || "Press here to choose a key"}</button>
+      {#if keyOpen}
+        <KeyChooser callback={keyChooserCallback}/>
+      {/if}
     </div>
   {/if}
   <div class="deleteDiv">
@@ -86,7 +112,7 @@
       border: none;
       background-color: rgba($color: #fff, $alpha: 0.1);
       border-radius: 1rem;
-      padding: .5rem;
+      padding: 0.5rem;
       color: util.is-color-dark(config.get-color("popup-bg"));
       outline: none;
       text-align: center;
@@ -99,15 +125,19 @@
       }
     }
     .keypress {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        p {
-          line-height: 0;
-          text-align: right;
-        }
-        input {
-          text-align: left;
-        }
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      p {
+        line-height: 0;
+        text-align: right;
+      }
+      input {
+        text-align: left;
+      }
+      button {
+        grid-column-start: 1;
+        grid-column-end: 3;
+      }
     }
     .deleteDiv {
       position: relative;

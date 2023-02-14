@@ -4,11 +4,12 @@
   import MdRefresh from "svelte-icons/md/MdRefresh.svelte";
 
   let options: Array<String>;
+    let selected;
 
   let refresh = async () => {
     options = await invoke("get_serial_ports");
+    selected = await invoke("get_serial_config");
   };
-  let selected;
 
   onMount(async () => await refresh());
 
@@ -23,7 +24,7 @@
     bind:value={selected}
     on:change={update_serial_port}
   >
-    <option value={"No Selected"}>No Selected</option>
+    <option value={""}>No Selected</option>
     {#if options}
       {#each options as option}
         <option value={option}>

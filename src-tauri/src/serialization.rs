@@ -1,11 +1,9 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    vec,
-};
+use std::{fs, path::PathBuf, vec};
 
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
+
+use crate::background::{BackgroundProcess, BackgroundState};
 
 fn get_config_path() -> Result<PathBuf, ()> {
     if let Some(proj_dirs) = ProjectDirs::from("com", "waayway", "sliders-and-buttons") {
@@ -15,8 +13,24 @@ fn get_config_path() -> Result<PathBuf, ()> {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct KeyComboMod {
+    pub alt: bool,
+    pub ctrl: bool,
+    pub shift: bool,
+    #[serde(rename = "super")]
+    pub meta: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct KeyCombo {
+    pub key: Option<String>,
+    pub modifiers: KeyComboMod,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GridItemData {
     pub key: Option<String>,
+    pub keyCombo: Option<KeyCombo>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -68,20 +82,27 @@ impl Data {
             grid_items: vec![],
         };
         let serialized = serde_json::to_string(&data).unwrap();
-        let tmp = fs::write(DEFAULT_PATH, serialized).unwrap();
+        fs::write(DEFAULT_PATH, serialized).unwrap();
         Ok(())
     }
 
-    pub fn save_data(&self) -> Result<(), ()> {
+    pub fn save_data(&self, state: tauri::State<BackgroundState>) -> Result<(), ()> {
         let DEFAULT_PATH = match get_config_path() {
             Ok(path) => path,
             Err(_) => "".into(),
         };
 
+        state
+            .0
+            .lock()
+            .unwrap()
+            .update_config(self.to_owned());
+
         let serialized = serde_json::to_string(&self).unwrap();
         println!("Saving config: {}", serialized);
 
         fs::write(DEFAULT_PATH, serialized).unwrap();
+
         Ok(())
     }
 }

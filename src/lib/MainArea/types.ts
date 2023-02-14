@@ -16,6 +16,7 @@ export type GridItemTemplate = {
 
 export type GridItemData = {
     key?: string,
+    keyCombo?: KeyCombo
 }
 
 export type Component = {
@@ -29,9 +30,9 @@ export type Component = {
 export type KeyCombo = {
     key?: string,
     modifiers: {
-        alt?: boolean,
-        ctrl?: boolean,
-        shift?: boolean,
-        super?: boolean
+        alt: boolean,
+        ctrl: boolean,
+        shift: boolean,
+        super: boolean
     }
 }

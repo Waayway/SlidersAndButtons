@@ -3,7 +3,7 @@
   import ItemPopup from "./ItemPopup.svelte";
   import Rotator from "./Rotator.svelte";
   import Slider from "./Slider.svelte";
-  import type { GridItem } from "./types";
+  import type { GridItem, KeyCombo } from "./types";
   export let gridData: GridItem;
   export let gridSize: number;
   export let deleteSelfFromItems: (gridData: GridItem) => void;
@@ -45,6 +45,11 @@
     itemOpen.set(-1);
   }
 
+  const updateKeyCombo = (keyCombo: KeyCombo) => {
+    gridData.data.keyCombo = keyCombo;
+    console.log(gridData);
+  }
+
 </script>
 
 <button
@@ -58,7 +63,7 @@
   {:else if gridData.type == "rotator"}
     <Rotator data={gridData} {gridSize} />
   {/if}
-  <ItemPopup {gridData} active={isPopupActive} {updateKey} {deleteSelf}/>
+  <ItemPopup {gridData} active={isPopupActive} {updateKey} {deleteSelf} {updateKeyCombo}/>
 </button>
 
 <style lang="scss">
