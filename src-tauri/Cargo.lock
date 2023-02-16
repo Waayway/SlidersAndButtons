@@ -54,6 +54,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "alsa-sys"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db8fee663d06c4e303404ef5f40488a53e062f89ba8bfed81f42325aafad1527"
+dependencies = [
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -151,6 +161,7 @@ dependencies = [
 name = "buttons_and_sliders"
 version = "0.0.0"
 dependencies = [
+ "alsa-sys",
  "directories",
  "serde",
  "serde_json",
@@ -158,6 +169,7 @@ dependencies = [
  "simulate",
  "tauri",
  "tauri-build",
+ "winapi",
 ]
 
 [[package]]

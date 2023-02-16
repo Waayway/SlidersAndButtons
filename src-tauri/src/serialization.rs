@@ -99,7 +99,9 @@ impl Data {
             .update_config(self.to_owned());
 
         let serialized = serde_json::to_string(&self).unwrap();
-        println!("Saving config: {}", serialized);
+        if cfg!(debug_assertions) {
+            println!("Saving config: {}", serialized);
+        }
 
         fs::write(DEFAULT_PATH, serialized).unwrap();
 

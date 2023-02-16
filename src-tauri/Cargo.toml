@@ -21,6 +21,12 @@ serialport = { version = "4.2.0"}
 directories = "4.0.1"
 simulate = "0.3.0"
 
+[target.'cfg(windows)'.dependencies]
+winapi = "0.3.9"
+
+[target.'cfg(unix)'.dependencies]
+alsa-sys = "0.3.1"
+
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL

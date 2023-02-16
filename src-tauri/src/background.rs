@@ -123,7 +123,9 @@ impl SerialConnection {
                     if result.is_some() {
                         let result = result.unwrap();
                         if result.keyCombo.is_some() {
-                            println!("{:?}", result.keyCombo);
+                            if cfg!(debug_assertions) {
+                                println!("{:?}", result.keyCombo);
+                            }
                             let keyCombo = result.keyCombo.as_ref().unwrap();
                             if keyCombo.modifiers.ctrl {
                                 simulate::press(Key::Control).ok();
