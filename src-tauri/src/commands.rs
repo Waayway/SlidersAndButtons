@@ -1,7 +1,7 @@
 use std::{sync::Mutex};
 
 
-use crate::{serialization::{Data, GridItem}, background::BackgroundState};
+use crate::{serialization::{Data, GridItem}, background::BackgroundState, audio::Audio};
 
 pub struct DataState(pub Mutex<Data>);
 
@@ -13,6 +13,14 @@ pub fn get_serial_ports() -> Vec<String> {
         converted_ports.push(p.port_name);
     }
     return converted_ports;
+}
+#[tauri::command] //background_state: tauri::State<BackgroundState>
+pub fn get_audio_sessions() -> Vec<String> {
+    // let output = background_state.0.lock().unwrap().sessions.as_mut().unwrap().to_vec();
+    // println!("{output:?}");
+    // output
+    let mut audio_controller = Audio::new();
+    audio_controller.get_all_sessions()
 }
 
 #[tauri::command]

@@ -22,7 +22,7 @@ directories = "4.0.1"
 simulate = "0.3.0"
 
 [target.'cfg(windows)'.dependencies]
-winapi = "0.3.9"
+windows-volume-control = {path = "../../windows-volume-control"}
 
 [target.'cfg(unix)'.dependencies]
 alsa-sys = "0.3.1"

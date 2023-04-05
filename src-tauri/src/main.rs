@@ -3,6 +3,7 @@
     windows_subsystem = "windows"
 )]
 
+use audio::AudioState;
 use background::{BackgroundProcess, BackgroundState};
 use commands::DataState;
 use serialization::Data;
@@ -12,6 +13,7 @@ use tauri::{CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem};
 mod background;
 mod commands;
 mod serialization;
+mod audio;
 
 fn build_tray() -> SystemTrayMenu {
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
@@ -47,13 +49,17 @@ fn on_tray_event(app: &AppHandle, event: SystemTrayEvent) {
                     std::process::exit(0);
                 }
                 "hide" => {
-                    let window = app.get_window("main").unwrap();
-                    if window.is_visible().unwrap() {
-                        window.hide().unwrap();
+                    let window = app.get_window("main");
+                    if window.is_some() {
+                        if window.as_ref().unwrap().is_visible().unwrap() {
+                            window.unwrap().hide().unwrap();
+                        } else {
+                            window.unwrap().show().unwrap();
+                        }
+                        item_handle.set_title("Show").unwrap();
                     } else {
-                        window.show().unwrap();
+                        eprintln!("ERROR: Application not active somehow...");
                     }
-                    item_handle.set_title("Show").unwrap();
                 }
                 _ => {}
             }
@@ -80,7 +86,8 @@ fn main() {
             commands::save_grid_config,
             commands::get_grid_config,
             commands::get_possible_keys,
-            commands::get_serial_config
+            commands::get_serial_config,
+            commands::get_audio_sessions
         ])
         .setup(|app| {
             let bg_state: tauri::State<BackgroundState> = app.state();

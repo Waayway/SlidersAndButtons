@@ -16,7 +16,8 @@ export type GridItemTemplate = {
 
 export type GridItemData = {
     key?: string,
-    keyCombo?: KeyCombo
+    keyCombo?: KeyCombo,
+    audio_sessions?: string[],
 }
 
 export type Component = {

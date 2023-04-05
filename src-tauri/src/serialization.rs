@@ -30,7 +30,8 @@ pub struct KeyCombo {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GridItemData {
     pub key: Option<String>,
-    pub keyCombo: Option<KeyCombo>
+    pub keyCombo: Option<KeyCombo>,
+    pub audio_sessions: Option<Vec<String>>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

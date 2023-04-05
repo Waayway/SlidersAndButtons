@@ -5,27 +5,38 @@ use std::{
         Mutex,
     },
     thread,
-    time::Duration,
-    vec,
+    time::{Duration, Instant},
+    vec, collections::HashMap,
 };
 
 use serialport::SerialPort;
 use simulate::Key;
 
-use crate::serialization::{Data, GridItemData};
+use crate::{
+    audio::Audio,
+    serialization::{Data, GridItemData},
+};
 
 pub struct BackgroundState(pub Mutex<BackgroundProcess>);
 
 pub struct BackgroundProcess {
     sender: Option<Sender<Data>>,
+    pub sessions: Option<Vec<String>>,
 }
+
 impl BackgroundProcess {
     pub fn new() -> Self {
-        Self { sender: None }
+        Self {
+            sender: None,
+            sessions: Some(vec![]),
+        }
     }
     pub fn spawn_thread(&mut self) {
         let (tx, rx) = mpsc::channel::<Data>();
+
         std::thread::spawn(move || {
+            let mut audio_controller = Audio::new();
+
             let mut data = Data {
                 serial_port: "".to_string(),
                 grid_items: vec![],
@@ -56,7 +67,7 @@ impl BackgroundProcess {
                     continue;
                 }
                 if let Some(x) = &mut serial_connection {
-                    x.run_loop(data.clone());
+                    x.run_loop(data.clone(), &mut audio_controller);
                 }
             }
         });
@@ -71,6 +82,7 @@ impl BackgroundProcess {
 
 struct SerialConnection {
     port: Box<dyn SerialPort>,
+    slider_values: Vec<i32>,
 }
 
 impl SerialConnection {
@@ -79,13 +91,13 @@ impl SerialConnection {
             .timeout(Duration::from_millis(10))
             .open()
             .expect("Failed to open port");
-        Self { port: port }
+        Self { port: port, slider_values: vec![] }
     }
 
     fn close_connection(&self) {
         drop(&self.port);
     }
-    fn run_loop(&mut self, config: Data) {
+    fn run_loop(&mut self, config: Data, audio_controller: &mut Audio) {
         // * Getting data from arduino
         let mut total_buf: String = String::new();
         let mut buffer: [u8; 1] = [0; 1];
@@ -108,20 +120,19 @@ impl SerialConnection {
         }
         // * Parsing data from the arduino
         let collection = total_buf.split("|");
+        let mut new_slider_values: HashMap<i32, i32> = HashMap::new();
         for i in collection {
             let mut info = i.trim();
             if info.starts_with("Button #") {
                 let data: i32 = info.replace("Button #", "").parse().unwrap_or(-1);
                 if data != -1 {
-                    let gridItemConfigs: Vec<GridItemData> =
-                        config.grid_items.iter().map(|i| i.data.clone()).collect();
-
-                    let result = gridItemConfigs
-                        .iter()
-                        .find(|&i| i.key.clone().unwrap_or("".to_string()) == data.to_string());
+                    let result = config.grid_items.iter().find(|i| {
+                        i.data.key.clone().unwrap_or("".to_string()) == data.to_string()
+                            && i.item_type == "button"
+                    });
 
                     if result.is_some() {
-                        let result = result.unwrap();
+                        let result = result.unwrap().data.clone();
                         if result.keyCombo.is_some() {
                             if cfg!(debug_assertions) {
                                 println!("{:?}", result.keyCombo);
@@ -159,9 +170,31 @@ impl SerialConnection {
                 }
             } else if info.starts_with("Slider #") {
                 let data = info.replace("Slider #", "");
-                // println!("{}", data);
+                let splitted_data: Vec<&str> = data.split(": ").collect();
+                let num: i32 = splitted_data[0].parse().unwrap_or(-1);
+                let value: i32 = splitted_data[1].parse().unwrap_or(-1);
+                // println!("{info}, {value}");
+                new_slider_values.insert(num, value);
+                if num != -1 && value != -1 {
+                    let result = config.grid_items.iter().find(|i| {
+                            i.data.key.clone().unwrap_or("".to_string()) == num.to_string()
+                            && (i.item_type == "slider" || i.item_type == "rotator")
+                    });
+                    if self.slider_values.len() > num as usize && result.is_some() {
+                        if self.slider_values[num as usize] != value {
+                            for i in result.unwrap().data.audio_sessions.clone().unwrap() {
+                                audio_controller.set_volume((value as f32) / 100.0, i);
+                            }
+                        }
+                    }
+                }
             }
         }
+        let mut new_slider_vec: Vec<i32> = vec![];
+        for (_, value) in new_slider_values {
+            new_slider_vec.push(value);
+        }
+        self.slider_values = new_slider_vec;
     }
 }
 
@@ -170,6 +203,7 @@ fn convertFromStringToKey(key: &str) -> Key {
         "escape" => Key::Escape,
         "mediaplaypause" => Key::MediaPlayPause,
         "mediaprevioustrack" => Key::MediaPreviousTrack,
+        "medianexttrack" => Key::MediaNextTrack,
         "mediastop" => Key::MediaStop,
         "f1" => Key::F1,
         "f2" => Key::F2,
